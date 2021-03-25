@@ -15,7 +15,7 @@
 #include "ICM20948.h"
 
 
-ICM20948::ICM20948(bool debug, int bus, int address) {
+ICM20948::ICM20948(bool debug, uint8_t bus, uint8_t address) {
 	this->debug = debug;
 	i2c = I2C_Functions(bus, address);
 }
@@ -35,6 +35,7 @@ bool ICM20948::whoAmI() {
 	else {
  		printe("Unable to properly ready the IMU.");
 		return false;
+	}
 }
 
 /* necessary to change the IMU out of sleep mode by calling this function first */
@@ -51,19 +52,19 @@ int ICM20948::disableSleep() {
 int ICM20948::enableSleep() {
 	selectBankReg(REG_BANK_0);
 	uint8_t status = i2c.read(PWR_MGMT_1);
-	status = BIT_SET(status, 6)			// sets sleep bit
+	status = BIT_SET(status, 6);		// sets sleep bit
 	int result = i2c.write(PWR_MGMT_1, status);
 
 	return result;
 }
 
-uint8_t* ICM20948::getStatus() {
+uint16_t ICM20948::getStatus() {
 	uint8_t status[2];
 	status[0] = i2c.read(PWR_MGMT_1);
 	status[1] = i2c.read(PWR_MGMT_2);
 
 	/* PWR_MGMT_1 */
-	clksel = status[0] & INT_OSC_BM;
+	uint8_t clksel = status[0] & INT_OSC_BM;
 	switch(clksel){
 		case 0:  printi("CLK: Internal 20MHz Oscillator."); break;
 		case 6:  printi("CLK: Internal 20MHz Oscillator."); break;
@@ -72,38 +73,39 @@ uint8_t* ICM20948::getStatus() {
 	}
 
     if (BIT_VAL(status[0], 3)) printi("TEMPERATURE: Disabled.");
-    else 					   printit("TEMPERATURE: Enabled.");
+    else 					   printi("TEMPERATURE: Enabled.");
 
     if (BIT_VAL(status[0], 6)) printi("SLEEP: True.");
-    else 					   printit("SLEEP: False.");
+    else 					   printi("SLEEP: False.");
 
 	if (BIT_VAL(status[0], 7)) printi("RESET: True.");
-	else 					   printit("RESET: False.");
+	else 					   printi("RESET: False.");
 
 
 	/* PWR_MGMT_2 */
-	acc_en = status[1] & ACCEL_AXES_EN;
+	uint8_t acc_en = status[1] & ACCEL_AXES_EN;
 	if (acc_en == ACCEL_ALL_AXES_ON) printi("Accelerometer ON.");
 	else 							 printi("Accelerometer OFF.");	
 	
-	gyro_en = status[1] & GYRO_AXES_EN;
+	uint8_t gyro_en = status[1] & GYRO_AXES_EN;
 	if (gyro_en == GYRO_ALL_AXES_ON) printi("Gyroscope ON.");
 	else 							 printi("Gyroscope OFF.");	
 
-	return status;
+	uint16_t combined_status = ( ((uint16_t)status[0] << 8) | ((uint16_t)status[0] & 0xFF) );
+	return combined_status;
 }
 
-float ICM20948::getTemperatureData() {
-	selectBankReg(handle, REG_BANK_0);
+float ICM20948::getTemperature() {
+	selectBankReg(REG_BANK_0);
 	uint16_t raw = i2c.read2(TEMP_OUT_H);
-	float temperature = (float)((( (float)(raw_temp - 21) )/333.87) + 21);
+	float temperature = (float)((( (float)(raw - 21) )/333.87) + 21);
 
 	if (debug && (temperature < 10 || temperature > 40)) printe("The temperature is out of the typical range for debugging.");
 
 	return temperature;
 }
 
-imu_t ICM20948::getIMUData() {
+ICM20948::imu_t ICM20948::getIMUData() {
 	imu_t imu;
 
 	acc_t acc = getAccData();
@@ -155,7 +157,7 @@ int ICM20948::getAccSens() {
 	return sens;
 }
 
-acc_t ICM20948::getAccData() {
+ICM20948::acc_t ICM20948::getAccData() {
 	int16_t rawAccX, rawAccY, rawAccZ; 
 	acc_t acc;
 
@@ -163,7 +165,8 @@ acc_t ICM20948::getAccData() {
 	if (sens < 0) return {0.0, 0.0, 0.0};
 	
 	selectBankReg(REG_BANK_0);
-	uint8_t* raw = i2c.readn(ACCEL_XOUT_H, 6);
+	uint8_t raw[6];
+	i2c.readn(ACCEL_XOUT_H, 6, raw);	// raw is returned with the desired data
 
 	rawAccX = ((int16_t)raw[0] << 8) | raw[1];
 	acc.x = (float)rawAccX / (float)sens;
@@ -211,7 +214,7 @@ float ICM20948::getGyroSens() {
 	return sens;
 }
 
-gyro_t ICM20948::getGyroData() {
+ICM20948::gyro_t ICM20948::getGyroData() {
 	int16_t rawGyroX, rawGyroY, rawGyroZ; 
 	gyro_t gyro;
 
@@ -219,7 +222,8 @@ gyro_t ICM20948::getGyroData() {
 	if (sens < 0) return {0.0, 0.0, 0.0};
 
 	selectBankReg(REG_BANK_0);
-	uint8_t* raw = i2c.readn(GYRO_XOUT_H, 6);
+	uint8_t raw[6];
+	i2c.readn(GYRO_XOUT_H, 6, raw);
 
 	rawGyroX = ((int16_t)raw[0] << 8) | raw[1];
 	gyro.x = (float)rawGyroX / sens;

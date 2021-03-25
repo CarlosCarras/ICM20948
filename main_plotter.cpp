@@ -16,23 +16,25 @@
 #include <chrono>
 #include "imu.h"
 
+#define DEBUG true
 
 int main() {
-    IMU imu();  // only one line of initialization required
-    imu_t data; // struct to hold all of the IMU data
+    IMU imu(DEBUG);  // only one line of initialization required
 
     int dur = 30;                                                                       // program loops for 30 seconds
-    std::chrono::steady_clock::timepoint start = std::chrono::steady_clock::now();      // start time for timer
-    std::ofstream file.open("imu_test.csv");                                            // write outputs to CSV file
+    std::chrono::system_clock::time_point start = std::chrono::system_clock::now();     // start time for timer
+    
+    std::ofstream file;
+    file.open("imu_test.csv");                                                          // write outputs to CSV file
 
     while(1) {
-    	data = imu.getIMUData();   // get all IMU data
+    	imu.updateIMU();   // update all IMU data
 
-        file << std::to_string(data.ax) <<  "," << std::to_string(data.ay) << "," << std::to_string(data.az) << ","
-             << std::to_string(data.gx) <<  "," << std::to_string(data.gy) << "," << std::to_string(data.gz) << ","
-             << std::to_string(data.temperature) << "\n";
+        file << std::to_string(imu.ax) <<  "," << std::to_string(imu.ay) << "," << std::to_string(imu.az) << ","
+             << std::to_string(imu.gx) <<  "," << std::to_string(imu.gy) << "," << std::to_string(imu.gz) << ","
+             << std::to_string(imu.temperature) << "\n";
 
-        if (std::chrono::steady_clock::now() - start > std::chrono::seconds(dur)) break; // timer
+        if (std::chrono::system_clock::now() - start > std::chrono::seconds(dur)) break; // timer
     }
 
     file.close();
