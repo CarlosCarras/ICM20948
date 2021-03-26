@@ -17,14 +17,9 @@
 
 /********************************* Includes *********************************/
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <string>
 #include <iostream>
-#include <stdlib.h>
-#include <stdint.h>
-#include "lsquaredc.h"
+#include "I2C_Functions.h"
 
 /********************************** Defines *********************************/
 /*
@@ -100,11 +95,11 @@ private:
 public:
 	struct acc_t {
 		float x, y, z;
-	}
+	};
 
 	struct gyro_t {
 		float x, y, z;
-	}
+	};
 
 	struct imu_t {
     	float ax, ay, az;
@@ -116,17 +111,17 @@ public:
 	int disableSleep();
 	int enableSleep();
 	bool whoAmI();
-	uint8_t* getStatus();
+	uint16_t getStatus();
 	float getTemperature();
-	imu_t getIMUData();
+	ICM20948::imu_t getIMUData();
 
 	/* accelerometer */
-	acc_t getAccData();
+	ICM20948::acc_t getAccData();
 	int getAccSens();
 	int setAccSens(uint8_t scale);
 
 	/* gyroscope */
-	gyro_t getGyroData();
+	ICM20948::gyro_t getGyroData();
 	float getGyroSens();
 	int setGyroSens(uint8_t scale);
 };
