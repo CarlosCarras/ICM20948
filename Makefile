@@ -24,7 +24,7 @@ lsquaredc.o: lsquaredc.h lsquaredc.c
 	$(CC) $(CFLAGS) -c lsquaredc.c -o lsquaredc.o
 
 testros: lsquaredc.o I2C_Functions.o ICM20948.o imu.o main.o
-	$(CCC) $(CPPFLAGS) -o testros main.o imu.o ICM20948.o I2C_Functions.o
+	$(CCC) $(CPPFLAGS) -o testros main.o imu.o ICM20948.o I2C_Functions.o lsquaredc.o
 
 testplot: lsquaredc.o I2C_Functions.o ICM20948.o imu.o main_plotter.o
 	$(CCC) $(CPPFLAGS) -o testplot main_plotter.o imu.o ICM20948.o I2C_Functions.o lsquaredc.o

@@ -13,8 +13,11 @@ void allROSGoesHere(IMU* imu) {
 
     /* do something with data */
     printf("ax: %f, ay: %f, az: %f\n", imu->ax, imu->ay, imu->az);
+<<<<<<< HEAD
     printf("gx: %f, gy: %f, gz: %f\n", imu->gx, imu->gy, imu->gz);
     printf("temperature: %f\n", imu->temperature);
+=======
+>>>>>>> 1dd15c3e444486d9f2a9d884ca7fd5200d4618e0
 }
 
 
