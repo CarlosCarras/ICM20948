@@ -54,15 +54,15 @@ ICM20948::imu_t IMU::getIMUData() {
 }
 
 float* IMU::getIMUArr(float* arr) {
-	/* requires {uint8_t arr[n];} prior to call. the values are returned in the 'arr' variable. */
+	/* requires {uint8_t arr[7];} prior to call. the values are returned in the 'arr' variable. */
 	ICM20948::imu_t data = getIMUData();
 	arr[0] = data.ax; 
-	arr[0] = data.ay; 
-	arr[0] = data.az; 
-	arr[0] = data.gx; 
-	arr[0] = data.gy; 
-	arr[0] = data.gz; 
-	arr[0] = data.temperature;
+	arr[1] = data.ay; 
+	arr[2] = data.az; 
+	arr[3] = data.gx; 
+	arr[4] = data.gy; 
+	arr[5] = data.gz; 
+	arr[6] = data.temperature;
 
 	return arr;
 }
@@ -86,7 +86,7 @@ ICM20948::acc_t IMU::getAccData() {
 }
 
 float* IMU::getAccArr(float* arr) {
-	/* requires {uint8_t arr[n];} prior to call. the values are returned in the 'arr' variable. */
+	/* requires {uint8_t arr[3];} prior to call. the values are returned in the 'arr' variable. */
 	ICM20948::acc_t data = getAccData();
 	arr[0] = data.x;
 	arr[1] = data.y, 
@@ -117,7 +117,7 @@ ICM20948::gyro_t IMU::getGyroData() {
 }
 
 float* IMU::getGyroArr(float* arr) {
-	/* requires {uint8_t arr[n];} prior to call. the values are returned in the 'arr' variable. */
+	/* requires {uint8_t arr[3];} prior to call. the values are returned in the 'arr' variable. */
 	ICM20948::gyro_t data = getGyroData();
 	arr[0] = data.x;
 	arr[1] = data.y, 
