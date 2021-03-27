@@ -228,13 +228,13 @@ ICM20948::gyro_t ICM20948::getGyroData() {
 	i2c.readn(GYRO_XOUT_H, 6, raw);
 
 	rawGyroX = ((int16_t)raw[0] << 8) | raw[1];
-	gyro.x = (float)rawGyroX / sens;
+	gyro.x = (float)rawGyroX / (float)sens;
 
 	rawGyroY = ((int16_t)raw[2] << 8) | raw[3];
-	gyro.y = (float)rawGyroY / sens;
+	gyro.y = (float)rawGyroY / (float)sens;
 
 	rawGyroZ = ((int16_t)raw[4] << 8) | raw[5];
-	gyro.z = (float)rawGyroZ / sens;
+	gyro.z = (float)rawGyroZ / (float)sens;
 
 	return gyro;
 }
