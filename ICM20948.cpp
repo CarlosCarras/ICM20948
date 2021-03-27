@@ -7,7 +7,7 @@
  * 
  * Author     : Carlos Carrasquillo
  * Date       : March 23, 2021
- * Modified   : March 23, 2021
+ * Modified   : March 26, 2021
  * Proprty of : ADAMUS Lab
  ****************************************************************************/
 
@@ -131,6 +131,7 @@ int ICM20948::setAccSens(uint8_t scale){
 		return -1;
 	}
 
+	selectBankReg(REG_BANK_2);
 	uint8_t config = i2c.read(ACCEL_CONFIG_1);
 	config &= (config & ~SENSITIVITY_BM) | scale;		// all bits but the sensitivity bits remain unaltered
 	i2c.write(ACCEL_CONFIG_1, config);
@@ -151,7 +152,7 @@ int ICM20948::getAccSens() {
 		case ACCEL_SENS_8G:  sens = 4096;  break;
 		case ACCEL_SENS_16G: sens = 2048;  break;
 		default:             sens = -1;    break;
-							 printe("Unknwon accelerometer sensitivity read.");
+							 printe("Unknown accelerometer sensitivity read.");
 	}
 
 	return sens;
@@ -188,6 +189,7 @@ int ICM20948::setGyroSens(uint8_t scale){
 		return -1;
 	}
 
+	selectBankReg(REG_BANK_2);
 	uint8_t config = i2c.read(GYRO_CONFIG_1);
 	config &= (config & ~SENSITIVITY_BM) | scale;		// all bits but the sensitivity bits remain unaltered
 	i2c.write(GYRO_CONFIG_1, config);
@@ -208,7 +210,7 @@ float ICM20948::getGyroSens() {
 		case GYRO_SENS_1000DPS: sens = 32.8;  break;
 		case GYRO_SENS_2000DPS: sens = 16.4;  break;
 		default:   			    sens = -1;    break;
-								printe("Unknwon gyroscope sensitivity read.");
+								printe("Unknown gyroscope sensitivity read.");
 	}
 
 	return sens;

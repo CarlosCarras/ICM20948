@@ -22,9 +22,11 @@ int main() {
     IMU imu(DEBUG);  		// only two lines of initialization required
     IMU* imu_ptr = &imu;
 
-    while(1) {
+    imu_ptr->getStatus();
+    for(int i = 0; i < 5; i++) {
         allROSGoesHere(imu_ptr);
     }
+    imu_ptr->getStatus();
 
     return 0;
 }
