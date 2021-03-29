@@ -147,10 +147,10 @@ int ICM20948::getAccSens() {
 	raw = i2c.read(ACCEL_CONFIG_1) & SENSITIVITY_BM;
 
 	switch (raw) {
-		case ACCEL_SENS_2G:  sens = 16384; break;
-		case ACCEL_SENS_4G:  sens = 8192;  break;
-		case ACCEL_SENS_8G:  sens = 4096;  break;
-		case ACCEL_SENS_16G: sens = 2048;  break;
+		case ACCEL_SENS_2G:  sens = 16384; break;  // 2^15 / 2
+		case ACCEL_SENS_4G:  sens = 8192;  break;  // 2^15 / 4
+		case ACCEL_SENS_8G:  sens = 4096;  break;  // 2^15 / 8
+		case ACCEL_SENS_16G: sens = 2048;  break;  // 2^15 / 16
 		default:             sens = -1;    break;
 							 printe("Unknown accelerometer sensitivity read.");
 	}
@@ -205,11 +205,11 @@ float ICM20948::getGyroSens() {
 	raw = i2c.read(GYRO_CONFIG_1) & SENSITIVITY_BM;
 
 	switch (raw) {
-		case GYRO_SENS_250DPS:  sens = 131.0; break;
-		case GYRO_SENS_500DPS:  sens = 65.5;  break;
-		case GYRO_SENS_1000DPS: sens = 32.8;  break;
-		case GYRO_SENS_2000DPS: sens = 16.4;  break;
-		default:   			    sens = -1;    break;
+		case GYRO_SENS_250DPS:  sens = 131.072; break;	// 2^15 / 250
+		case GYRO_SENS_500DPS:  sens = 65.536;  break;  // 2^15 / 500
+		case GYRO_SENS_1000DPS: sens = 32.768;  break;  // 2^15 / 1000
+		case GYRO_SENS_2000DPS: sens = 16.384;  break;  // 2^15 / 2000
+		default:   			    sens = -1;      break;
 								printe("Unknown gyroscope sensitivity read.");
 	}
 
@@ -228,13 +228,13 @@ ICM20948::gyro_t ICM20948::getGyroData() {
 	i2c.readn(GYRO_XOUT_H, 6, raw);
 
 	rawGyroX = ((int16_t)raw[0] << 8) | raw[1];
-	gyro.x = (float)rawGyroX / (float)sens;
+	gyro.x = (float)rawGyroX / sens;
 
 	rawGyroY = ((int16_t)raw[2] << 8) | raw[3];
-	gyro.y = (float)rawGyroY / (float)sens;
+	gyro.y = (float)rawGyroY / sens;
 
 	rawGyroZ = ((int16_t)raw[4] << 8) | raw[5];
-	gyro.z = (float)rawGyroZ / (float)sens;
+	gyro.z = (float)rawGyroZ / sens;
 
 	return gyro;
 }
