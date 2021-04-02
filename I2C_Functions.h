@@ -34,8 +34,8 @@
 #define BIT_CLEAR(x, bit) ((x) &= ~(1ULL<<(bit)))
 #define BIT_TOGGLE(x, bit) (x ^ (1 << bit))
 
-#define C_BIG_ENDIAN		0
-#define C_LITTLE_ENDIAN	1
+#define BIG_ENDIAN		0
+#define LITTLE_ENDIAN	1
 
 
 /************************** Functions **************************/
@@ -47,18 +47,19 @@ private:
 
 public:  
 	I2C_Functions();
-	I2C_Functions(uint8_t bus, uint8_t device_addr, bool endianness = C_BIG_ENDIAN);
-	void set_address(uint8_t new_addr);							// sets the device address
-	uint8_t get_address();										// fetches the device address
+	I2C_Functions(uint8_t bus, uint8_t device_addr, bool endianness = BIG_ENDIAN);
+	void set_address(uint8_t new_addr);					// sets the device address
+	uint8_t get_address();								// fetches the device address
 
-	int write(uint8_t reg, uint8_t data);						// writes 1 byte of data into register
-	int write2(uint8_t reg, uint16_t data);						// writes 2 bytes of data into consecutive registers
-	int writen(uint8_t reg, uint8_t* data, int n);				// wrotes n bytes of data into conecutive register
-	uint8_t read(uint8_t reg);									// reads 1 byte of data from register
-	uint16_t read2(uint8_t reg);								// reads 2 bytes of data from consecutive registers
-	uint8_t* readn(uint8_t reg, int n, uint8_t* data_received);	// reads n bytes of data from consecutive registers (requires memory preallocation)
+	int write(uint8_t reg, uint8_t data);				// writes 1 byte of data into register
+	int write2(uint8_t reg, uint16_t data);				// writes 2 bytes of data into consecutive registers
+	int writen(uint8_t reg, uint8_t* data, int n);		// wrotes n bytes of data into conecutive register
+	uint8_t read(uint8_t reg);							// reads 1 byte of data from register
+	uint16_t read2(uint8_t reg);						// reads 2 bytes of data from consecutive registers
+	uint8_t* readn(uint8_t reg, int n);					// reads n bytes of data from consecutive registers
 	
 	void print_uint8(std::string descriptor, uint8_t data);
+	void print_uint16(std::string descriptor, uint16_t data);
 };
 
 #endif // I2C_FUNCTIONS

@@ -14,26 +14,24 @@
  ****************************************************************************/
 
 
-#ifndef D3_IMU_H
-#define D3_IMU_H
+#ifndef IMU_H
+#define IMU_H
 
 
 /********************************* Includes *********************************/
-#include <stdio.h>
-#include <string>
-#include <iostream>
 #include "ICM20948.h"
 
 
 /********************************* Defines **********************************/
 
+#define DEBUG true
 
 
 /*********************************** IMU ************************************/
 
 class IMU {
 private:
-	ICM20948 imu;
+	ICM20948 imu(DEBUG);
 
 	/* Debug Functions */
 	bool debug;
@@ -41,33 +39,28 @@ private:
 	void printi(std::string str) { if (debug) std::cout << "INFO: " << str << " (imu.cpp)" << std::endl; }
 
 public:
-	float ax, ay, az, gx, gy, gz, temperature;
-
 	explicit IMU(bool debug = false);
 	bool isActive();
 	void disableSleep();
 	void enableSleep();
 	float getTemperature();
-	uint16_t getStatus();
-	ICM20948::imu_t getIMUData();
-	float* getIMUArr(float* arr);
-	void updateIMU();
+	uint8_t* getStatus();
+	imu_t getIMUData();
+	float* getIMUArr();
 
 	/* accelerometer */
-	ICM20948::acc_t getAccData();
-	float* getAccArr(float* arr);
-	void updateAcc();
+	acc_t getAccData();
+	float* getAccArr();
 	int getAccSens();
 	void setAccSens(uint8_t scale);
 
 	/* gyroscope */
-	ICM20948::gyro_t getGyroData();
-	float* getGyroArr(float* arr);
-	void updateGyro();
+	gyro_t getGyroData();
+	float* getGyroArr();
 	int getGyroSens();
 	void setGyroSens(uint8_t scale);
 
 };
 
-#endif // D3_IMU_H
+#endif // IMU_H
 

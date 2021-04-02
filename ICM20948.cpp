@@ -7,7 +7,7 @@
  * 
  * Author     : Carlos Carrasquillo
  * Date       : March 23, 2021
- * Modified   : March 26, 2021
+ * Modified   : March 23, 2021
  * Proprty of : ADAMUS Lab
  ****************************************************************************/
 
@@ -15,7 +15,7 @@
 #include "ICM20948.h"
 
 
-ICM20948::ICM20948(bool debug, uint8_t bus, uint8_t address) {
+ICM20948::ICM20948(bool debug, int bus, int address) {
 	this->debug = debug;
 	i2c = I2C_Functions(bus, address);
 }
@@ -35,7 +35,6 @@ bool ICM20948::whoAmI() {
 	else {
  		printe("Unable to properly ready the IMU.");
 		return false;
-	}
 }
 
 /* necessary to change the IMU out of sleep mode by calling this function first */
@@ -52,19 +51,19 @@ int ICM20948::disableSleep() {
 int ICM20948::enableSleep() {
 	selectBankReg(REG_BANK_0);
 	uint8_t status = i2c.read(PWR_MGMT_1);
-	status = BIT_SET(status, 6);		// sets sleep bit
+	status = BIT_SET(status, 6)			// sets sleep bit
 	int result = i2c.write(PWR_MGMT_1, status);
 
 	return result;
 }
 
-uint16_t ICM20948::getStatus() {
+uint8_t* ICM20948::getStatus() {
 	uint8_t status[2];
 	status[0] = i2c.read(PWR_MGMT_1);
 	status[1] = i2c.read(PWR_MGMT_2);
 
 	/* PWR_MGMT_1 */
-	uint8_t clksel = status[0] & INT_OSC_BM;
+	clksel = status[0] & INT_OSC_BM;
 	switch(clksel){
 		case 0:  printi("CLK: Internal 20MHz Oscillator."); break;
 		case 6:  printi("CLK: Internal 20MHz Oscillator."); break;
@@ -73,39 +72,38 @@ uint16_t ICM20948::getStatus() {
 	}
 
     if (BIT_VAL(status[0], 3)) printi("TEMPERATURE: Disabled.");
-    else 					   printi("TEMPERATURE: Enabled.");
+    else 					   printit("TEMPERATURE: Enabled.");
 
     if (BIT_VAL(status[0], 6)) printi("SLEEP: True.");
-    else 					   printi("SLEEP: False.");
+    else 					   printit("SLEEP: False.");
 
 	if (BIT_VAL(status[0], 7)) printi("RESET: True.");
-	else 					   printi("RESET: False.");
+	else 					   printit("RESET: False.");
 
 
 	/* PWR_MGMT_2 */
-	uint8_t acc_en = status[1] & ACCEL_AXES_EN;
+	acc_en = status[1] & ACCEL_AXES_EN;
 	if (acc_en == ACCEL_ALL_AXES_ON) printi("Accelerometer ON.");
 	else 							 printi("Accelerometer OFF.");	
 	
-	uint8_t gyro_en = status[1] & GYRO_AXES_EN;
+	gyro_en = status[1] & GYRO_AXES_EN;
 	if (gyro_en == GYRO_ALL_AXES_ON) printi("Gyroscope ON.");
 	else 							 printi("Gyroscope OFF.");	
 
-	uint16_t combined_status = ( ((uint16_t)status[0] << 8) | ((uint16_t)status[0] & 0xFF) );
-	return combined_status;
+	return status;
 }
 
-float ICM20948::getTemperature() {
-	selectBankReg(REG_BANK_0);
+float ICM20948::getTemperatureData() {
+	selectBankReg(handle, REG_BANK_0);
 	uint16_t raw = i2c.read2(TEMP_OUT_H);
-	float temperature = (float)((( (float)(raw - 21) )/333.87) + 21);
+	float temperature = (float)((( (float)(raw_temp - 21) )/333.87) + 21);
 
 	if (debug && (temperature < 10 || temperature > 40)) printe("The temperature is out of the typical range for debugging.");
 
 	return temperature;
 }
 
-ICM20948::imu_t ICM20948::getIMUData() {
+imu_t ICM20948::getIMUData() {
 	imu_t imu;
 
 	acc_t acc = getAccData();
@@ -131,9 +129,8 @@ int ICM20948::setAccSens(uint8_t scale){
 		return -1;
 	}
 
-	selectBankReg(REG_BANK_2);
 	uint8_t config = i2c.read(ACCEL_CONFIG_1);
-	config &= (config & ~SENSITIVITY_BM) | scale;		// all bits but the sensitivity bits remain unaltered
+	config = (config & ~SENSITIVITY_BM) | scale;		// all bits but the sensitivity bits remain unaltered
 	i2c.write(ACCEL_CONFIG_1, config);
 
 	return 0;
@@ -147,18 +144,18 @@ int ICM20948::getAccSens() {
 	raw = i2c.read(ACCEL_CONFIG_1) & SENSITIVITY_BM;
 
 	switch (raw) {
-		case ACCEL_SENS_2G:  sens = 16384; break;  // 2^15 / 2
-		case ACCEL_SENS_4G:  sens = 8192;  break;  // 2^15 / 4
-		case ACCEL_SENS_8G:  sens = 4096;  break;  // 2^15 / 8
-		case ACCEL_SENS_16G: sens = 2048;  break;  // 2^15 / 16
+		case ACCEL_SENS_2G:  sens = 16384; break;
+		case ACCEL_SENS_4G:  sens = 8192;  break;
+		case ACCEL_SENS_8G:  sens = 4096;  break;
+		case ACCEL_SENS_16G: sens = 2048;  break;
 		default:             sens = -1;    break;
-							 printe("Unknown accelerometer sensitivity read.");
+							 printe("Unknwon accelerometer sensitivity read.");
 	}
 
 	return sens;
 }
 
-ICM20948::acc_t ICM20948::getAccData() {
+acc_t ICM20948::getAccData() {
 	int16_t rawAccX, rawAccY, rawAccZ; 
 	acc_t acc;
 
@@ -166,8 +163,7 @@ ICM20948::acc_t ICM20948::getAccData() {
 	if (sens < 0) return {0.0, 0.0, 0.0};
 	
 	selectBankReg(REG_BANK_0);
-	uint8_t raw[6];
-	i2c.readn(ACCEL_XOUT_H, 6, raw);	// raw is returned with the desired data
+	uint8_t* raw = i2c.readn(ACCEL_XOUT_H, 6);
 
 	rawAccX = ((int16_t)raw[0] << 8) | raw[1];
 	acc.x = (float)rawAccX / (float)sens;
@@ -189,9 +185,8 @@ int ICM20948::setGyroSens(uint8_t scale){
 		return -1;
 	}
 
-	selectBankReg(REG_BANK_2);
 	uint8_t config = i2c.read(GYRO_CONFIG_1);
-	config &= (config & ~SENSITIVITY_BM) | scale;		// all bits but the sensitivity bits remain unaltered
+	config = (config & ~SENSITIVITY_BM) | scale;		// all bits but the sensitivity bits remain unaltered
 	i2c.write(GYRO_CONFIG_1, config);
 
 	return 0;
@@ -205,18 +200,18 @@ float ICM20948::getGyroSens() {
 	raw = i2c.read(GYRO_CONFIG_1) & SENSITIVITY_BM;
 
 	switch (raw) {
-		case GYRO_SENS_250DPS:  sens = 131.072; break;	// 2^15 / 250
-		case GYRO_SENS_500DPS:  sens = 65.536;  break;  // 2^15 / 500
-		case GYRO_SENS_1000DPS: sens = 32.768;  break;  // 2^15 / 1000
-		case GYRO_SENS_2000DPS: sens = 16.384;  break;  // 2^15 / 2000
-		default:   			    sens = -1;      break;
-								printe("Unknown gyroscope sensitivity read.");
+		case GYRO_SENS_250DPS:  sens = 131.0; break;
+		case GYRO_SENS_500DPS:  sens = 65.5;  break;
+		case GYRO_SENS_1000DPS: sens = 32.8;  break;
+		case GYRO_SENS_2000DPS: sens = 16.4;  break;
+		default:   			    sens = -1;    break;
+								printe("Unknwon gyroscope sensitivity read.");
 	}
 
 	return sens;
 }
 
-ICM20948::gyro_t ICM20948::getGyroData() {
+gyro_t ICM20948::getGyroData() {
 	int16_t rawGyroX, rawGyroY, rawGyroZ; 
 	gyro_t gyro;
 
@@ -224,8 +219,7 @@ ICM20948::gyro_t ICM20948::getGyroData() {
 	if (sens < 0) return {0.0, 0.0, 0.0};
 
 	selectBankReg(REG_BANK_0);
-	uint8_t raw[6];
-	i2c.readn(GYRO_XOUT_H, 6, raw);
+	uint8_t* raw = i2c.readn(GYRO_XOUT_H, 6);
 
 	rawGyroX = ((int16_t)raw[0] << 8) | raw[1];
 	gyro.x = (float)rawGyroX / sens;

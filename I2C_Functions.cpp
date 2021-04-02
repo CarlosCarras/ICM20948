@@ -57,7 +57,7 @@ int I2C_Functions::write2(uint8_t reg, uint16_t data) {
 	uint8_t low = (data >> 0) & 0xFF;
 	uint8_t high = (data >> 8) & 0xFF;
 
-	if (endianness == C_BIG_ENDIAN) {
+	if (endianness == BIG_ENDIAN) {
 		write(reg, high);
 		status = write(reg+1, low);
 	} else {
@@ -106,30 +106,34 @@ uint16_t I2C_Functions::read2(uint8_t reg) {
 	i2c_close(handle);
 
 	uint16_t data_read;
-	if (endianness == C_BIG_ENDIAN) data_read = (((uint16_t)data_received[0])<<8) | ((uint16_t)data_received[1]);
-	else 						    data_read = (((uint16_t)data_received[1])<<8) | ((uint16_t)data_received[0]);
+	if (endianness == BIG_ENDIAN) data_read = (((uint16_t)data_received[0])<<8) | ((uint16_t)data_received[1]);
+	else 						  data_read = (((uint16_t)data_received[1])<<8) | ((uint16_t)data_received[0]);
 	
 	return data_read;
 }
 
-uint8_t* I2C_Functions::readn(uint8_t reg, int n, uint8_t* data_received) {
-	/* requires {uint8_t data[n];} prior to call. the values are returned in the 'data' variable. */
+uint8_t* I2C_Functions::readn(uint8_t reg, int n) {
 	int m = 4;					// initial read sequence length
 	int read_seq_len = m+n;
 	uint16_t read_sequence[read_seq_len] = {I2CAddr_Write, reg, I2C_RESTART, I2CAddr_Read};
 	for (int i = m; i < read_seq_len; i++) {
 		read_sequence[i] = I2C_READ;
 	}
+	uint8_t data_received[n] = {0};
 
 	int handle = i2c_open(I2CBus);
 	i2c_send_sequence(handle, read_sequence, read_seq_len, &data_received[0]);
 	i2c_close(handle);
 
-	return data_received;
+	return &data_received[0];
 }
 
 /********************* Visualize *******************/
 
 void I2C_Functions::print_uint8(std::string descriptor, uint8_t data) {
+	std::cout << descriptor << ": " << std::hex << static_cast<int>(data) << std::endl;
+}
+
+void I2C_Functions::print_uint16(std::string descriptor, uint16_t data) {
 	std::cout << descriptor << ": " << std::hex << static_cast<int>(data) << std::endl;
 }

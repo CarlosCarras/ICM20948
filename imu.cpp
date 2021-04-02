@@ -17,20 +17,19 @@
 #include "imu.h"
 
 
-IMU::IMU(bool debug) {
-	this->debug = debug;
+IMU::IMU() {
+	debug = DEBUG;
 	int status = 0;
 
-	imu = ICM20948(debug);
 	status += imu.setAccSens(ACCEL_SENS_4G);
 	status += imu.setGyroSens(GYRO_SENS_500DPS);
-	status += imu.disableSleep();	// necessary!
+	status += disableSleep();	// necessary!
 
 	if (status < 0) printe("IMU could not be initialized.");
 }
 
 bool IMU::isActive() {
-	return imu.whoAmI();
+	return whoAmI();
 }
 
 void IMU::disableSleep() {
@@ -45,62 +44,31 @@ float IMU::getTemperature() {
 	return imu.getTemperature();
 }
 
-uint16_t IMU::getStatus() {
+uint8_t* IMU::getStatus() {
 	return imu.getStatus();
 }
 
-ICM20948::imu_t IMU::getIMUData() {
+imu_t IMU::getIMUData() {
 	return imu.getIMUData();
 }
 
-float* IMU::getIMUArr(float* arr) {
-	/* requires {uint8_t arr[7];} prior to call. the values are returned in the 'arr' variable. */
-	ICM20948::imu_t data = getIMUData();
-	arr[0] = data.ax; 
-	arr[1] = data.ay; 
-	arr[2] = data.az; 
-	arr[3] = data.gx; 
-	arr[4] = data.gy; 
-	arr[5] = data.gz; 
-	arr[6] = data.temperature;
-
-	return arr;
+float* IMU::getIMUArr() {
+	imu_t data = getIMUData();
+	float imu_arr[7] = {data.ax, data.ay, data.az, data.gx, data.gy, data.gz, data.temperature};
+	return imu_arr;
 }
-
-void IMU::updateIMU() {
-	ICM20948::imu_t data = getIMUData();
-	ax = data.ax; 
-	ay = data.ay; 
-	az = data.az; 
-	gx = data.gx; 
-	gy = data.gy; 
-	gz = data.gz; 
-	temperature = data.temperature;
-}
-
 
 /****************************** Accelerometer *******************************/
 
-ICM20948::acc_t IMU::getAccData() {
+acc_t IMU::getAccData() {
 	return imu.getAccData();
 }
 
-float* IMU::getAccArr(float* arr) {
-	/* requires {uint8_t arr[3];} prior to call. the values are returned in the 'arr' variable. */
-	ICM20948::acc_t data = getAccData();
-	arr[0] = data.x;
-	arr[1] = data.y, 
-	arr[2] = data.z;
-	return  arr;
+float* IMU::getAccArr() {
+	acc_t data = getAccData();
+	float acc_arr[3] = {data.x, data.y, data.z};
+	return  acc_arr;
 }
-
-void IMU::updateAcc() {
-	ICM20948::acc_t data = getAccData();
-	ax = data.x; 
-	ay = data.y; 
-	az = data.z; 
-}
-
 
 int IMU::getAccSens() {
 	return imu.getAccSens();
@@ -112,27 +80,15 @@ void IMU::setAccSens(uint8_t scale) {
 
 /******************************** Gyroscope *********************************/
 
-ICM20948::gyro_t IMU::getGyroData() {
+gyro_t IMU::getGyroData() {
 	return imu.getGyroData();
 }
 
-float* IMU::getGyroArr(float* arr) {
-	/* requires {uint8_t arr[3];} prior to call. the values are returned in the 'arr' variable. */
-	ICM20948::gyro_t data = getGyroData();
-	arr[0] = data.x;
-	arr[1] = data.y, 
-	arr[2] = data.z;
-
-	return  arr;
+float* IMU::getGyroArr() {
+	gryo_t data = getGyroData();
+	float gyro_arr[3] = {data.x, data.y, data.z};
+	return  gyro_arr;
 }
-
-void IMU::updateGyro() {
-	ICM20948::gyro_t data = getGyroData();
-	gx = data.x; 
-	gy = data.y; 
-	gz = data.z; 
-}
-
 
 int IMU::getGyroSens() {
 	return imu.getGyroSens();
