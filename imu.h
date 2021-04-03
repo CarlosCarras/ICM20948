@@ -70,4 +70,3 @@ public:
 };
 
 #endif // D3_IMU_H
-

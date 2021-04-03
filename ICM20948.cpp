@@ -133,7 +133,7 @@ int ICM20948::setAccSens(uint8_t scale){
 
 	selectBankReg(REG_BANK_2);
 	uint8_t config = i2c.read(ACCEL_CONFIG_1);
-	config = (config & ~SENSITIVITY_BM) | scale;		// all bits but the sensitivity bits remain unaltered
+	config &= (config & ~SENSITIVITY_BM) | scale;		// all bits but the sensitivity bits remain unaltered
 	i2c.write(ACCEL_CONFIG_1, config);
 
 	return 0;
@@ -191,7 +191,7 @@ int ICM20948::setGyroSens(uint8_t scale){
 
 	selectBankReg(REG_BANK_2);
 	uint8_t config = i2c.read(GYRO_CONFIG_1);
-	config = (config & ~SENSITIVITY_BM) | scale;		// all bits but the sensitivity bits remain unaltered
+	config &= (config & ~SENSITIVITY_BM) | scale;		// all bits but the sensitivity bits remain unaltered
 	i2c.write(GYRO_CONFIG_1, config);
 
 	return 0;
@@ -228,15 +228,12 @@ ICM20948::gyro_t ICM20948::getGyroData() {
 	i2c.readn(GYRO_XOUT_H, 6, raw);
 
 	rawGyroX = ((int16_t)raw[0] << 8) | raw[1];
-	i2c.print_uint16("rawGyroX: ", rawGyroX);
 	gyro.x = (float)rawGyroX / sens;
 
 	rawGyroY = ((int16_t)raw[2] << 8) | raw[3];
-	i2c.print_uint16("rawGyroY: ", rawGyroY);
 	gyro.y = (float)rawGyroY / sens;
 
 	rawGyroZ = ((int16_t)raw[4] << 8) | raw[5];
-	i2c.print_uint16("rawGyroZ: ", rawGyroZ);
 	gyro.z = (float)rawGyroZ / sens;
 
 	return gyro;
