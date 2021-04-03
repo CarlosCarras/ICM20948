@@ -35,7 +35,7 @@
 #define BIT_TOGGLE(x, bit) (x ^ (1 << bit))
 
 #define C_BIG_ENDIAN		0
-#define C_LITTLE_ENDIAN	1
+#define C_LITTLE_ENDIAN		1
 
 
 /************************** Functions **************************/
@@ -59,6 +59,7 @@ public:
 	uint8_t* readn(uint8_t reg, int n, uint8_t* data_received);	// reads n bytes of data from consecutive registers (requires memory preallocation)
 	
 	void print_uint8(std::string descriptor, uint8_t data);
+	void print_uint16(std::string descriptor, uint16_t data);
 };
 
 #endif // I2C_FUNCTIONS

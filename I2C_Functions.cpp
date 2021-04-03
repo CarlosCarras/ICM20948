@@ -31,7 +31,6 @@ void I2C_Functions::set_address(uint8_t new_addr) {
 	if (new_addr != 0) {
 		std::cout << "Device Write Address: " << std::hex << static_cast<int>(I2CAddr_Write) << std::endl;
 		std::cout << "Device Read Address: " << std::hex << static_cast<int>(I2CAddr_Read) << std::endl;
-
 	}
 }
 
@@ -76,6 +75,7 @@ int I2C_Functions::writen(uint8_t reg, uint8_t* data, int n) {
 	uint16_t write_sequence[write_seq_len] = {I2CAddr_Write, reg};
 	int j = 0;									// data byte counter
 	for (int i = m; i < write_seq_len; i++) {
+		print_uint8("I2C", data[j]);
 		write_sequence[i] = data[j++];
 	}
 
@@ -87,6 +87,7 @@ int I2C_Functions::writen(uint8_t reg, uint8_t* data, int n) {
 }
 
 uint8_t I2C_Functions::read(uint8_t reg) {
+	print_uint8("Write Address", I2CAddr_Write);
 	uint16_t read_sequence[] = {I2CAddr_Write, reg, I2C_RESTART, I2CAddr_Read, I2C_READ};
 	uint8_t data_received[1] = {0};
 
@@ -131,5 +132,9 @@ uint8_t* I2C_Functions::readn(uint8_t reg, int n, uint8_t* data_received) {
 /********************* Visualize *******************/
 
 void I2C_Functions::print_uint8(std::string descriptor, uint8_t data) {
+	std::cout << descriptor << ": " << std::hex << static_cast<int>(data) << std::endl;
+}
+
+void I2C_Functions::print_uint16(std::string descriptor, uint16_t data) {
 	std::cout << descriptor << ": " << std::hex << static_cast<int>(data) << std::endl;
 }
